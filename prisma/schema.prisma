@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STUDENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  GRADUATED
+  SUSPENDED
+}
+
+enum DocumentType {
+  SYLLABUS
+  NOTE
+  QUESTION_PAPER
+}
+
+model User {
+  id                 String     @id @default(uuid()) @db.Uuid
+  studentId          String?    @unique @db.VarChar(100)
+  username           String?    @unique @db.VarChar(100)
+  name               String     @db.VarChar(150)
+  password           String     @db.Text
+  role               Role       @default(STUDENT)
+  status             UserStatus @default(ACTIVE)
+  mustChangePassword Boolean    @default(true)
+  batchId            String?    @db.Uuid
+  currentSemesterId  String?    @db.Uuid
+  currentSemester    Semester?  @relation(fields: [currentSemesterId], references: [id], onDelete: SetNull)
+  uploadedDocuments  Document[] @relation("DocumentUploadedBy")
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  @@index([role])
+  @@index([status])
+}
+
+model Semester {
+  id        String    @id @default(uuid()) @db.Uuid
+  number    Int       @unique
+  name      String    @db.VarChar(100)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  users     User[]
+  subjects  Subject[]
+}
+
+model Subject {
+  id         String     @id @default(uuid()) @db.Uuid
+  name       String     @db.VarChar(200)
+  code       String     @unique @db.VarChar(50)
+  semesterId String     @db.Uuid
+  semester   Semester   @relation(fields: [semesterId], references: [id], onDelete: Restrict)
+  documents  Document[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([semesterId])
+}
+
+model Document {
+  id           String       @id @default(uuid()) @db.Uuid
+  title        String       @db.VarChar(250)
+  type         DocumentType
+  pdfUrl       String       @db.Text
+  publicId     String       @db.VarChar(255)
+  year         Int?
+  subjectId    String       @db.Uuid
+  uploadedById String       @db.Uuid
+  subject      Subject      @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  uploadedBy   User         @relation("DocumentUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([subjectId])
+  @@index([uploadedById])
+  @@index([type])
+}
