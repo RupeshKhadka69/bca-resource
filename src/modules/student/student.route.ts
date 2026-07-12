@@ -1,4 +1,4 @@
-import { Role } from "../../../generated/prisma/index.js";
+import { Role } from "@prisma/client";
 import { requireAuth } from "../../middleware/auth.middleware.js";
 import { requireRole } from "../../middleware/role.middleware.js";
 import { Router } from "express";

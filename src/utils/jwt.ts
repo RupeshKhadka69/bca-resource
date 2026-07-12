@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-import type { Role } from "../../generated/prisma/index.js";
+import type { Role } from "@prisma/client";
 
 export type JwtPayload = {
   userId: string;

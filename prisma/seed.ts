@@ -1,4 +1,4 @@
-import { PrismaClient } from "../generated/prisma/index.js";
+import { PrismaClient } from "@prisma/client";
 import { spawnSync } from "node:child_process";
 
 import { hashPassword } from "../src/utils/password.js";

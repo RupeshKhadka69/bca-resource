@@ -4,7 +4,7 @@ import { env } from "../config/env.js";
 import { prisma } from "../config/prisma.js";
 import { ApiError } from "../utils/api-error.js";
 import { verifyJwt } from "../utils/jwt.js";
-import { UserStatus } from "../../generated/prisma/index.js";
+import { UserStatus } from "@prisma/client";
 
 export const requireAuth: RequestHandler = async (req, _res, next) => {
   try {

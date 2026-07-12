@@ -1,4 +1,4 @@
-import { Prisma, Role, UserStatus } from "../../../generated/prisma/index.js";
+import { Prisma, Role, UserStatus } from "@prisma/client";
 
 import { env } from "../../config/env.js";
 import { prisma } from "../../config/prisma.js";
