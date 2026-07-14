@@ -131,14 +131,18 @@ const finalizeYear = (
   return null;
 };
 
-const uploadDocumentPdfToCloudinary = async (buffer: Buffer) => {
+const uploadDocumentPdfToCloudinary = async (
+  buffer: Buffer,
+  originalName: string,
+) => {
   try {
-    return await uploadPdf(buffer);
+    return await uploadPdf(buffer, originalName);
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
         : "Unknown Cloudinary upload error";
+
     throw new ApiError(502, `Failed to upload PDF to Cloudinary: ${message}`);
   }
 };
@@ -147,15 +151,21 @@ const deleteDocumentPdfFromCloudinary = async (publicId: string) => {
   try {
     const result = await deletePdf(publicId);
 
-    if (result !== "ok" && result !== "not found") {
-      throw new Error(`Cloudinary delete returned ${result}`);
+    if (result.result !== "ok" && result.result !== "not found") {
+      throw new Error(
+        `Cloudinary delete returned ${result.result}`,
+      );
     }
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
         : "Unknown Cloudinary delete error";
-    throw new ApiError(502, `Failed to delete PDF from Cloudinary: ${message}`);
+
+    throw new ApiError(
+      502,
+      `Failed to delete PDF from Cloudinary: ${message}`,
+    );
   }
 };
 
@@ -198,6 +208,7 @@ export const createDocument = async (input: {
   year?: string;
   pdf: Buffer;
   uploadedById: string;
+  pdfOriginalName: string;
 }): Promise<DocumentRecord> => {
   const title = normalizeTitle(input.title);
   const type = parseDocumentType(input.type);
@@ -211,7 +222,10 @@ export const createDocument = async (input: {
     throw new ApiError(400, "Year is required for QUESTION_PAPER documents");
   }
 
-  const uploadedFile = await uploadDocumentPdfToCloudinary(input.pdf);
+  const uploadedFile = await uploadDocumentPdfToCloudinary(
+    input.pdf,
+    input.pdfOriginalName,
+  );
 
   try {
     return await prisma.document.create({
@@ -239,6 +253,7 @@ export const updateDocument = async (input: {
   subjectId?: string;
   year?: string;
   pdf?: Buffer;
+  pdfOriginalName?: string;
 }): Promise<DocumentRecord> => {
   const existingDocument = await getDocumentOrThrow(input.id);
 
@@ -269,9 +284,12 @@ export const updateDocument = async (input: {
 
   let uploadedFile: { secure_url: string; public_id: string } | undefined;
 
-  if (input.pdf) {
-    uploadedFile = await uploadDocumentPdfToCloudinary(input.pdf);
-  }
+  if (input.pdf && input.pdfOriginalName) {
+  uploadedFile = await uploadDocumentPdfToCloudinary(
+    input.pdf,
+    input.pdfOriginalName,
+  );
+}
 
   try {
     const updatedDocument = await prisma.document.update({

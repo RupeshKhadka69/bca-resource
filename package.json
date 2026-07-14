@@ -10,9 +10,6 @@
     "start": "node dist/src/server.js",
     "prisma:seed": "tsx prisma/seed.ts"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",

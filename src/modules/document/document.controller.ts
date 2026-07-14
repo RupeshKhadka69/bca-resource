@@ -73,6 +73,7 @@ export const createDocumentController = asyncHandler(
       subjectId,
       year,
       pdf: req.file.buffer,
+      pdfOriginalName: req.file.originalname,
       uploadedById: req.user.id,
     });
 
@@ -102,6 +103,7 @@ export const updateDocumentController = asyncHandler(
       ...(subjectId !== undefined ? { subjectId } : {}),
       ...(year !== undefined ? { year } : {}),
       ...(req.file ? { pdf: req.file.buffer } : {}),
+      ...(req.file ? { pdfOriginalName: req.file.originalname } : {}),
     });
 
     res.status(200).json({

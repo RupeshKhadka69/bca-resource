@@ -1,29 +1,18 @@
 import { PrismaClient } from "@prisma/client";
-import { spawnSync } from "node:child_process";
 
 import { hashPassword } from "../src/utils/password.js";
 
 const adminUsername = process.env.ADMIN_USERNAME?.trim();
 const adminPassword = process.env.ADMIN_PASSWORD?.trim();
+
 const prisma = new PrismaClient();
-
-function runMigrations() {
-  const result = spawnSync("npx", ["prisma", "migrate", "deploy"], {
-    stdio: "inherit",
-    env: process.env,
-  });
-
-  if (result.status !== 0) {
-    throw new Error("Failed to apply Prisma migrations before seeding");
-  }
-}
 
 async function main() {
   if (!adminUsername || !adminPassword) {
-    return;
+    throw new Error(
+      "ADMIN_USERNAME and ADMIN_PASSWORD are required for seeding",
+    );
   }
-
-  runMigrations();
 
   const existingAdmin = await prisma.user.findFirst({
     where: {
@@ -33,6 +22,7 @@ async function main() {
   });
 
   if (existingAdmin) {
+    console.log("Admin already exists");
     return;
   }
 
@@ -51,6 +41,8 @@ async function main() {
       currentSemesterId: null,
     },
   });
+
+  console.log("Admin created successfully");
 }
 
 main()

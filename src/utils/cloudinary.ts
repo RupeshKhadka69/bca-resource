@@ -1,14 +1,22 @@
-import { PassThrough } from "node:stream";
-
 import { cloudinary } from "../config/cloudinary.js";
 
-export const uploadPdf = async (buffer: Buffer) => {
+export const uploadPdf = async (
+  buffer: Buffer,
+  originalName: string,
+) => {
   return new Promise<{ secure_url: string; public_id: string }>(
     (resolve, reject) => {
+      const safeName = originalName
+        .replace(/\.pdf$/i, "")
+        .replace(/[^a-zA-Z0-9_-]/g, "-");
+
+      const publicId = `${safeName}-${Date.now()}.pdf`;
+
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: "bca-resources/documents",
           resource_type: "raw",
+          public_id: publicId,
         },
         (error, result) => {
           if (error) {
@@ -28,9 +36,7 @@ export const uploadPdf = async (buffer: Buffer) => {
         },
       );
 
-      const stream = new PassThrough();
-      stream.end(buffer);
-      stream.pipe(uploadStream);
+      uploadStream.end(buffer);
     },
   );
 };
