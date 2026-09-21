@@ -40,6 +40,7 @@ model User {
   currentSemesterId  String?    @db.Uuid
   currentSemester    Semester?  @relation(fields: [currentSemesterId], references: [id], onDelete: SetNull)
   uploadedDocuments  Document[] @relation("DocumentUploadedBy")
+  createdAssignments Assignment[] @relation("AssignmentCreatedBy")
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
@@ -64,6 +65,7 @@ model Subject {
   semesterId String     @db.Uuid
   semester   Semester   @relation(fields: [semesterId], references: [id], onDelete: Restrict)
   documents  Document[]
+  assignments Assignment[]
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 
@@ -87,4 +89,25 @@ model Document {
   @@index([subjectId])
   @@index([uploadedById])
   @@index([type])
+}
+
+model Assignment {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @db.VarChar(250)
+  description String?  @db.Text
+  assignedDate DateTime
+  dueDate     DateTime?
+  maxMarks    Float?
+  pdfUrl      String?  @db.Text
+  publicId    String?  @db.VarChar(255)
+  subjectId   String   @db.Uuid
+  createdById String   @db.Uuid
+  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  createdBy   User     @relation("AssignmentCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([subjectId])
+  @@index([createdById])
+  @@index([dueDate])
 }

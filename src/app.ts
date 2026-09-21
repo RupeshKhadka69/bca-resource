@@ -7,6 +7,7 @@ import documentRoutes from "./modules/document/document.route.js";
 import studentRoutes from "./modules/student/student.route.js";
 import semesterRoutes from "./modules/semester/semester.route.js";
 import subjectRoutes from "./modules/subject/subject.route.js";
+import assignmentRoutes from "./modules/assignment/assignment.route.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 
 const app = express();
@@ -27,6 +28,7 @@ app.use("/api/admin/students", studentRoutes);
 app.use("/api/semesters", semesterRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/documents", documentRoutes);
+app.use("/api/assignments", assignmentRoutes);
 
 app.use((_req, _res, next) => {
   next(new ApiError(404, "Route not found"));

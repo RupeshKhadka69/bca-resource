@@ -3,6 +3,7 @@ import { cloudinary } from "../config/cloudinary.js";
 export const uploadPdf = async (
   buffer: Buffer,
   originalName: string,
+  folder = "bca-resources/documents",
 ) => {
   return new Promise<{ secure_url: string; public_id: string }>(
     (resolve, reject) => {
@@ -14,7 +15,7 @@ export const uploadPdf = async (
 
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: "bca-resources/documents",
+          folder,
           resource_type: "raw",
           public_id: publicId,
         },

@@ -1,4 +1,5 @@
 import type { ErrorRequestHandler } from "express";
+import multer from "multer";
 import { ZodError } from "zod";
 
 import { Prisma } from "@prisma/client";
@@ -22,6 +23,15 @@ export const errorMiddleware: ErrorRequestHandler = (
       success: false,
       message: error.issues[0]?.message ?? "Validation failed",
     });
+  }
+
+  if (error instanceof multer.MulterError) {
+    if (error.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        success: false,
+        message: "PDF file size exceeds the allowed limit",
+      });
+    }
   }
 
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
